@@ -7,42 +7,64 @@ load_dotenv()
 
 class PostgresDB:
     def __init__(self):
-        self.conn = psycopg.connect(os.getenv("DATABASE_URL"))
-        self.conn.autocommit = True
+        try:
+            self.conn = psycopg.connect(os.getenv("DATABASE_URL"))
+            self.conn.autocommit = True
+        except Exception as e:
+            print(f"Database initialization failed: {e}")
+            raise e
 
     def close(self):
-        self.conn.close()
+        try:
+            self.conn.close()
+        except Exception as e:
+            print(f"Error closing database connection: {e}")
 
     # -----------------------
     # CREATE
     # -----------------------
     def connect(self):
-        self.conn = psycopg.connect(os.getenv("DATABASE_URL"))
+        try:
+            self.conn = psycopg.connect(os.getenv("DATABASE_URL"))
+        except Exception as e:
+            print(f"Database connection failed: {e}")
+            raise e
+
     def insert(self, table: str, data: dict):
-        if self.conn.closed:
-            self.connect() 
-        columns = ", ".join(data.keys())
-        placeholders = ", ".join(["%s"] * len(data))
+        try:
+            if self.conn.closed:
+                self.connect() 
+            columns = ", ".join(data.keys())
+            placeholders = ", ".join(["%s"] * len(data))
 
-        query = f"""
-            INSERT INTO {table} ({columns})
-            VALUES ({placeholders})
-        """
-        print(query)
+            query = f"""
+                INSERT INTO {table} ({columns})
+                VALUES ({placeholders})
+            """
+            print(query)
 
-        with self.conn.cursor() as cur:
-            cur.execute(query, tuple(data.values()))
+            with self.conn.cursor() as cur:
+                cur.execute(query, tuple(data.values()))
+        except Exception as e:
+            print(f"Database insert error: {e}")
+            raise e
 
     # -----------------------
     # READ
     # -----------------------
     def get_all(self, table: str):
-        with self.conn.cursor() as cur:
-            cur.execute(f"SELECT * FROM {table}")
-            columns = [d.name for d in cur.description]
-            rows = cur.fetchall()
+        try:
+            if self.conn.closed:
+                self.connect()
+            with self.conn.cursor() as cur:
+                cur.execute(f"SELECT * FROM {table}")
+                columns = [d.name for d in cur.description]
+                rows = cur.fetchall()
 
-        return columns, rows
+            return columns, rows
+        except Exception as e:
+            print(f"Database read error: {e}")
+            raise e
 
     # def get_by_id(self, table: str, id_column: str, value):
     #     query = f"SELECT * FROM {table} WHERE {id_column}=%s"

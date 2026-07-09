@@ -39,19 +39,32 @@ def about():
 
 @app.route("/create-order", methods=["POST"])
 def create_order():
-    order = client.order.create({
-        "amount": os.environ["COURCE_COST"],  # amount in paise
-        "currency": "INR",
-        "receipt": "order_001"
-    })
-    
+    try:
+        # Convert cost to integer (Razorpay expects amount in paise as an integer)
+        amount_str = os.environ.get("COURCE_COST")
+        if not amount_str:
+            raise ValueError("COURCE_COST environment variable is not set")
+        amount = int(amount_str)
 
-    return jsonify({
-        "order_id": order["id"],
-        "key": RAZORPAY_KEY_ID,
-        "amount": order["amount"],
-        "currency": order["currency"]
-    })
+        order = client.order.create({
+            "amount": amount,  # amount in paise
+            "currency": "INR",
+            "receipt": "order_001"
+        })
+        
+        return jsonify({
+            "order_id": order["id"],
+            "key": RAZORPAY_KEY_ID,
+            "amount": order["amount"],
+            "currency": order["currency"]
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 @app.post("/verify-payment")
 def verify_payment():
