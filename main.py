@@ -100,8 +100,8 @@ from functools import wraps
 import os
 
 # Admin credentials
-ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME" )
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
 # Authentication decorator
 def require_auth(f):
