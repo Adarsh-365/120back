@@ -4,3 +4,4 @@ razorpay==1.4.1
 python-dotenv==1.0.1
 psycopg[binary]==3.1.18
 pydantic==2.7.1
+setuptools
